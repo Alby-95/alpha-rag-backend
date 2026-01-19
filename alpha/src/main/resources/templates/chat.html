@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <title>Alpha Chat Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; }
+        .row { display: flex; gap: 8px; margin-bottom: 10px; }
+        input, textarea, button { padding: 8px; }
+        input { width: 200px; }
+        textarea { width: 100%; height: 80px; }
+        pre { background: #111; color: #0f0; padding: 10px; overflow: auto; }
+    </style>
+</head>
+<body>
+<h2>Alpha Chat (테스트 UI)</h2>
+
+<div class="row">
+    <button id="btnCreate">대화 생성</button>
+    <div>conversationId: <b id="convId">없음</b></div>
+</div>
+
+<div class="row">
+    <textarea id="content" placeholder="메시지 입력"></textarea>
+</div>
+
+<div class="row">
+    <button id="btnSend">전송</button>
+    <button id="btnLoad">메시지 불러오기</button>
+</div>
+
+<h3>결과</h3>
+<pre id="out"></pre>
+
+<script>
+    let conversationId = null;
+
+    function show(obj) {
+        document.getElementById('out').textContent =
+            typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2);
+    }
+
+    async function createConversation() {
+        const res = await fetch('/api/conversations', { method: 'POST' });
+        const data = await res.json();
+        conversationId = data.id ?? data.conversationId ?? data?.id;
+        document.getElementById('convId').textContent = conversationId ?? '없음';
+        show(data);
+    }
+
+    async function sendMessage() {
+        if (!conversationId) return show('먼저 대화를 생성하세요.');
+        const content = document.getElementById('content').value.trim();
+        if (!content) return show('content를 입력하세요.');
+
+        const res = await fetch(`/api/conversations/${conversationId}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content })
+        });
+        const data = await res.json();
+        show(data);
+    }
+
+    async function loadMessages() {
+        if (!conversationId) return show('먼저 대화를 생성하세요.');
+        const res = await fetch(`/api/conversations/${conversationId}/messages`);
+        const data = await res.json();
+        show(data);
+    }
+
+    document.getElementById('btnCreate').addEventListener('click', createConversation);
+    document.getElementById('btnSend').addEventListener('click', sendMessage);
+    document.getElementById('btnLoad').addEventListener('click', loadMessages);
+</script>
+</body>
+</html>
