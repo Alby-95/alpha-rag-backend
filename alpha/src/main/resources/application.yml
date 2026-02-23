@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: jdbc:mysql://localhost:3306/alpha?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=utf8
-    username: alpha
-    password: alpha
+    username: root
+    password: 1234
   openai:
     api-key: ${OPENAI_API_KEY:}
     model: gpt-4o-mini
